@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, useColorScheme } from 'react-native';
+import { Text, StyleSheet, ActivityIndicator, useColorScheme, SafeAreaView } from 'react-native';
 import { Themes } from '../constants/theme';
 import { scaleFont, scaleHeight } from '../constants/metric';
 
@@ -16,11 +16,11 @@ const SplashScreen = ({ navigation }: any) => {
   }, [navigation]);
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <Text style={[styles.title, { color: theme.text }]}>UserList Infinite Scroll</Text>
       <ActivityIndicator size="large" color={theme.primary} style={styles.loader} />
       <Text style={[styles.subtitle, { color: theme.text }]}>Loading...</Text>
-    </View>
+    </SafeAreaView>
   );
 };
 

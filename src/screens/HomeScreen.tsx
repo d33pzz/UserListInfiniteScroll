@@ -24,32 +24,29 @@ const HomeScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { users, isLoading, page } = useSelector((state: RootState) => state.users);
+
   const [filter, setFilter] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const scheme = useColorScheme();
   const theme = scheme === 'dark' ? Themes.dark.colors : Themes.light.colors;
 
+  // Load users with pagination
   const loadUsers = useCallback(() => {
-    dispatch(fetchUsers(page) as any);
-  }, [dispatch, page]);
+    if (!isLoading) {
+      dispatch(fetchUsers(page) as any);
+    }
+  }, [dispatch, isLoading, page]);
 
+  // Refresh the list
   const refreshUsers = async () => {
+    setIsRefreshing(true);
     dispatch(resetUsers());
     loadUsers();
+    setIsRefreshing(false);
   };
 
-  const filterUsers = users.filter((user) =>
-    user.location.country.toLowerCase().includes(filter.toLowerCase())
-  );
-
-  const handleUserPress = (user: any) => {
-    navigation.navigate('UserDetails' as never, { user } as never);
-  };
-
-  useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
-
+  // Cache users for offline access
   useEffect(() => {
     const cacheData = async () => {
       if (!isLoading && users.length > 0) {
@@ -59,6 +56,7 @@ const HomeScreen = () => {
     cacheData();
   }, [users, isLoading]);
 
+  // Load cached users when offline
   const loadOfflineData = async () => {
     const cachedUsers = await AsyncStorage.getItem('usersCache');
     if (cachedUsers) {
@@ -69,6 +67,28 @@ const HomeScreen = () => {
   useEffect(() => {
     loadOfflineData();
   }, []);
+
+  // Filter users based on input
+  const filterUsers = users.filter((user) =>
+    user.location.country.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  // Navigate to user details
+  const handleUserPress = (user: any) => {
+    navigation.navigate('UserDetails' as never, { user } as never);
+  };
+
+  // Trigger API call on scroll near the end
+  const handleEndReached = () => {
+    if (!isLoading && filterUsers.length >= 10) {
+      loadUsers();
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -108,11 +128,11 @@ const HomeScreen = () => {
               </View>
             </TouchableOpacity>
           )}
-          onEndReached={loadUsers}
-          onEndReachedThreshold={0.5}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.5} // Trigger when 50% of the remaining list is visible
           refreshControl={
             <RefreshControl
-              refreshing={isLoading}
+              refreshing={isRefreshing}
               onRefresh={refreshUsers}
               tintColor={theme.primary}
             />
