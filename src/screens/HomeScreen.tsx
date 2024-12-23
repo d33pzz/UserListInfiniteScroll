@@ -1,29 +1,33 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
   View,
   Text,
-  FlatList,
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
   TextInput,
-  Button,
   TouchableOpacity,
   Image,
   SafeAreaView,
+  FlatList,
+  useColorScheme,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { fetchUsers, resetUsers } from '../redux/slices/userSlice';
+import { Themes } from '../constants/theme';
+import { scaleFont, scaleHeight, scaleWidth } from '../constants/metric';
 
 const HomeScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { users, isLoading, page } = useSelector((state: RootState) => state.users);
+  const [filter, setFilter] = useState('');
 
-  const [filter, setFilter] = React.useState('');
+  const scheme = useColorScheme();
+  const theme = scheme === 'dark' ? Themes.dark.colors : Themes.light.colors;
 
   const loadUsers = useCallback(() => {
     dispatch(fetchUsers(page) as any);
@@ -58,7 +62,6 @@ const HomeScreen = () => {
   const loadOfflineData = async () => {
     const cachedUsers = await AsyncStorage.getItem('usersCache');
     if (cachedUsers) {
-      // Load cached users if offline
       console.log('Loaded offline data:', JSON.parse(cachedUsers));
     }
   };
@@ -68,33 +71,52 @@ const HomeScreen = () => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <TextInput
-        style={styles.searchInput}
+        style={[
+          styles.searchInput,
+          {
+            backgroundColor: theme.card,
+            borderColor: theme.border,
+            color: theme.text,
+          },
+        ]}
         placeholder="Filter by country"
+        placeholderTextColor={theme.placeholder}
         value={filter}
         onChangeText={setFilter}
       />
       {isLoading && users.length === 0 ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={theme.primary} />
       ) : (
         <FlatList
           data={filterUsers}
           keyExtractor={(item, index) => `${item.login.uuid}-${index}`}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.userCard} onPress={() => handleUserPress(item)}>
+            <TouchableOpacity
+              style={[styles.userCard, { backgroundColor: theme.card }]}
+              onPress={() => handleUserPress(item)}
+            >
               <Image source={{ uri: item.picture.thumbnail }} style={styles.thumbnail} />
               <View>
-                <Text style={styles.name}>
+                <Text style={[styles.name, { color: theme.text }]}>
                   {item.name.first} {item.name.last}
                 </Text>
-                <Text style={styles.country}>{item.location.country}</Text>
+                <Text style={[styles.country, { color: theme.subtext }]}>
+                  {item.location.country}
+                </Text>
               </View>
             </TouchableOpacity>
           )}
           onEndReached={loadUsers}
           onEndReachedThreshold={0.5}
-          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refreshUsers} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={refreshUsers}
+              tintColor={theme.primary}
+            />
+          }
         />
       )}
     </SafeAreaView>
@@ -104,40 +126,34 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: scaleWidth(16),
   },
   searchInput: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 20,
-    marginBottom: 16,
-    paddingHorizontal: 8,
-    marginHorizontal: 5,
-    width: "98%",
+    height: scaleHeight(40),
+    borderWidth: scaleWidth(1),
+    borderRadius: scaleWidth(20),
+    paddingHorizontal: scaleWidth(8),
+    marginBottom: scaleHeight(16),
   },
   userCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
-    padding: 10,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 5,
+    marginBottom: scaleHeight(16),
+    padding: scaleWidth(10),
+    borderRadius: scaleWidth(5),
   },
   thumbnail: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
+    width: scaleWidth(50),
+    height: scaleWidth(50),
+    borderRadius: scaleWidth(25),
+    marginRight: scaleWidth(10),
   },
   name: {
-    fontSize: 16,
+    fontSize: scaleFont(16),
     fontWeight: 'bold',
   },
   country: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: scaleFont(14),
   },
 });
 

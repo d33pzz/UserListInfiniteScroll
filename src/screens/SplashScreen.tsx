@@ -1,23 +1,25 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, StyleSheet, ActivityIndicator, useColorScheme } from 'react-native';
+import { Themes } from '../constants/theme';
+import { scaleFont, scaleHeight } from '../constants/metric';
 
-const SplashScreen = () => {
-  const navigation = useNavigation();
+const SplashScreen = ({ navigation }: any) => {
+  const scheme = useColorScheme();
+  const theme = scheme === 'dark' ? Themes.dark.colors : Themes.light.colors;
 
   useEffect(() => {
-    // Simulate loading time
     const timer = setTimeout(() => {
-      navigation.navigate('UserList' as never);
-    }, 2000);
+      navigation.replace('UserList'); // Navigate to the UserList screen
+    }, 2000); // Simulate a 2-second splash delay
 
-    return () => clearTimeout(timer);
+    return () => clearTimeout(timer); // Clear timer on unmount
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>User List App</Text>
-      <ActivityIndicator size="large" color="#0000ff" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <Text style={[styles.title, { color: theme.text }]}>UserList Infinite Scroll</Text>
+      <ActivityIndicator size="large" color={theme.primary} style={styles.loader} />
+      <Text style={[styles.subtitle, { color: theme.text }]}>Loading...</Text>
     </View>
   );
 };
@@ -29,9 +31,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: scaleFont(28),
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: scaleHeight(16),
+  },
+  loader: {
+    marginVertical: scaleHeight(16),
+  },
+  subtitle: {
+    fontSize: scaleFont(16),
   },
 });
 
