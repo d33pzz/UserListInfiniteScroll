@@ -1,4 +1,4 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+This is a new [**React Native**](https://reactnative.dev) project - USER LIST iNFINITE SCROLL, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started
 
@@ -63,6 +63,17 @@ You've successfully run and modified your React Native App. :partying_face:
 
 - If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
 - If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+
+
+### Features of this application?
+- FlatList Infinite Scroll
+- Pull Down to Refresh
+- Fetch according to scroll down
+- Search Filter
+- User Details Page
+- Offline Check
+- Cached Data for viewing Items.
+
 
 # Troubleshooting
 
